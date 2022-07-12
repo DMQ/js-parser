@@ -1,0 +1,15 @@
+{
+  "name": "ast_learn",
+  "version": "1.0.0",
+  "description": "",
+  "main": "ast.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@babel/generator": "^7.18.7",
+    "acorn": "^8.7.1"
+  }
+}

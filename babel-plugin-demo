@@ -1,0 +1,77 @@
+// babel plugin
+export default function (babel) {
+  const { types: t } = babel;
+
+  return {
+    name: 'ast-transform', // not required
+    visitor: {
+      Identifier(path) {
+        // path.node.name = path.node.name.split('').reverse().join('');
+        //const parentPath = path.findParent((path) => path.isFunctionDeclaration());
+        //console.log('ttt', parentPath);
+        //if (parentPath) {
+        //  const param = parentPath.node.params.find((p) => p.name === path.node.name && t.isIdentifier(p));
+        //  if (param) {
+        //    param.name = 'a';
+        //  }
+        //}
+      },
+      ArrayExpression(path) {
+        path.node.elements.push(t.numberLiteral(10));
+      },
+      NumericLiteral(path) {
+        if (
+          path.node.value === 2 &&
+          path.findParent((path) => path.isIfStatement())
+        ) {
+          path.node.value *= 10;
+        }
+      },
+
+      FunctionDeclaration(path) {
+        const paramsNames = path.node.params.map((item) => {
+          if (t.isIdentifier(item)) {
+            return item.name;
+          }
+
+          if (t.isAssignmentPattern) {
+            return item.left.name;
+          }
+        });
+
+        const pPrefix = 'a';
+
+        path.stop();
+
+        path.traverse({
+          Identifier(path) {
+            console.log('f_i', path.node);
+            paramsNames.forEach((p, index) => {
+              if (path.node.name === p) {
+                path.node.name = `${pPrefix}${index}`;
+                path.node.end -= 1;
+              }
+            });
+          },
+        });
+      },
+
+      ArrowFunctionExpression(path) {
+        const { node } = path;
+        console.log('arrow', path);
+        const blockStatement = t.isBlockStatement(node.body)
+          ? node.body
+          : t.blockStatement([t.returnStatement(node.body)]);
+        path.replaceWith(
+          t.functionExpression(
+            null,
+            node.params,
+            blockStatement,
+            node.generator,
+            node.async
+          )
+        );
+      },
+    },
+  };
+}

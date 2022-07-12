@@ -1,0 +1,5 @@
+.DS_STORE
+*.log
+*.sw[op]
+
+node_modules
