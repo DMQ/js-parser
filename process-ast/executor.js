@@ -15,7 +15,7 @@ const Scope = require('./scope');
    },
 
    [astTypes.Identifier](node, scope) { // 原子类型：标识符
-    return scope.get(node.name).value; // 变量或者属性取值
+    return scope.get(node.name).get(); // 变量或者属性取值
    },
 
    [astTypes.StringLiteral](node) { // 原子类型：字符串
@@ -70,8 +70,8 @@ const Scope = require('./scope');
      // 标识符，取出该变量
      if (left.type === astTypes.Identifier) {
        const { name } = left;
-       const varVal = scope.get(name);
-       varVal.value = traverse(right, scope); // 变量赋值
+       const atomValue = scope.get(name);
+       atomValue.set(traverse(right, scope)); // 变量赋值
      } else if (left.type === astTypes.MemberExpression) {
       // 成员表达式
       const object = traverse(left.object); // 获取对象

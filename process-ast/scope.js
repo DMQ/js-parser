@@ -1,4 +1,21 @@
 /**
+ * @desc 原子值，解释执行js代码过程中，要实现对某个变量进行声明、赋值、取值时，需通过一个对象代理实现
+ */
+class AtomValue {
+  constructor(kind, value) {
+    this.kinde = kind;
+    this.value = value;
+  }
+
+  get() {
+    return this.value;
+  }
+
+  set(value) {
+    this.value = value;
+  }
+}
+/**
  * @desc 作用域，暂不考虑 let/const 声明
  */
 class Scope {
@@ -23,7 +40,7 @@ class Scope {
   set(name, value) {
     const decl = this.get(name);
     if (decl) {
-      decl.value = value;
+      decl.set(value);
     }
   }
 
@@ -32,10 +49,7 @@ class Scope {
     const decl = this.declaration[name];
 
     if (!decl) {
-      this.declaration[name] = {
-        kind: 'var',
-        value: value,
-      };
+      this.declaration[name] = new AtomValue('var', value);
     }
   }
 }
