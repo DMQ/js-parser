@@ -1,5 +1,5 @@
 const { TokenStream } = require('./token-stream');
-const { parserTools } = require('./tools');
+const { parserTools, tokenTools } = require('./tools');
 const { tokenTypes, astTypes } = require('./types');
 
 class Parser {
@@ -55,54 +55,42 @@ class Parser {
   parseVariable() {
     const token = this.tokenStream.next(); // 拿出var
 
+    // 变量声明
     const variableDeclaration = {
       type: astTypes.VariableDeclaration,
-      declarations: [],
+      declarations: [], // 可能存在多个变量声明
       kind: token.value,
     };
 
     // TODO: 处理前可以做一些异常处理
-    // 遍历token，遇到分号结束
+    // 遍历token，遇到分号结束（换行先不考虑），var a = 1; var a,b = 1;均满足
     while(!this.tokenStream.eof()) {
       const node = {
         type: astTypes.VariableDeclarator,
-        id: this.parseIdentifier(), // 解析标识符
-        init: null, // 初始赋值
+        id: this.parseIdentifier(), // 解析标识符'var'
+        init: null, // 初始赋值，多个变量声明的情况，只有最后一个节点赋初始值（estree规范）
       };
 
-      // =号，赋值语句
+      // 将单个变量声明节点，push进去
+      variableDeclaration.declarations.push(node);
+
+      // 1、多个变量声明的情况，跳过逗号，进入下一轮循环继续遍历其他变量
+      if (parserTools.isPunctuator(this.tokenStream.peek(), ',')) {
+        this.tokenStream.next();
+        continue;
+      }
+
+      // 2、判断是否=号赋值
       if (parserTools.isOperator(this.tokenStream.peek(), '=')) {
         this.tokenStream.next();
 
-        node.init = this.parseStatement(); // 递归调用即可
-
-        // const nextToken = this.tokenStream.peek();
-        // // 字符串、数字字面量
-        // if (parserTools.isString(nextToken) || parserTools.isNumber(nextToken)) {
-        //   node.init = this.parseLiteral();
-        // } else if (parserTools.isIdentifier(nextToken)) {
-        //   // 标识符
-        //   node.init = this.parseIdentifier();
-        // }
+        node.init = this.parseStatement(); // 初始值，可能是字面量，可能是表达式，递归调用即可
       }
 
-      variableDeclaration.declarations.push(node);
-
-      // 考虑 var a,b = 1; 这种情况
-      if (this.tokenStream.peek().value !== ',') {
-        break;
-      }
-
-      this.skipPunctuator(','); // 跳过逗号
-
-      // // 遇到换分号结束
-      // if (parserTools.isPunctuator(this.tokenStream.peek(), ';')) {
-      //   this.tokenStream.next(); // 顺便跳过
-      //   break;
-      // }
+      break; // 跳出循环
     }
 
-    this.skipPunctuator(';'); // 跳过分号
+    this.skipPunctuator(';'); // 跳过分号（非分号结尾此处会报错，暂不考虑换行）
 
     return variableDeclaration;
   }

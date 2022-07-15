@@ -25,9 +25,11 @@ const visitor = {
   [astTypes.VariableDeclaration](node) { // 变量声明，生成声明类型（kind)/变量名(id)，以及初始值（init）
     const { declarations } = node;
 
-    let code = `${node.kind} ${declarations.map((declarator) => generator(declarator.id)).join(',')}`; // => var a,b
+    // => var a,b
+    let code = `${node.kind} ${declarations.map((declarator) => generator(declarator.id)).join(',')}`;
 
-    const initValue = declarations[declarations.length - 1].init; // 如果有多个声明器，初始值是放在最后一个（生成ast的时候的规则）
+    // 如果有多个声明器，初始值是放在最后一个（生成ast的时候的规则）
+    const initValue = declarations[declarations.length - 1].init;
     if (initValue) {
       code += ` = ${generator(initValue)}`;
     }
@@ -69,7 +71,7 @@ function generator(ast) {
     return gen(ast); // 递归调用
   }
 
-  throw new Error(`未找到对应的生成函数: ${ast.type}`);
+  throw new Error(`未找到对应的生成函数: ${JSON.stringify(ast)}`);
 };
 
 module.exports = {

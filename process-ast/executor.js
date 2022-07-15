@@ -73,20 +73,20 @@ const Scope = require('./scope');
        const atomValue = scope.get(name);
        atomValue.set(traverse(right, scope)); // 变量赋值
      } else if (left.type === astTypes.MemberExpression) {
-      // 成员表达式
-      const object = traverse(left.object); // 获取对象
-      object[perperty] = traverse(right, scope); // 对象属性赋值
+      // 成员表达式: left.object -> { type: 'Identifier', name: 'object' }
+      const object = traverse(left.object, scope); // 获取对象
+      object[left.perperty] = traverse(right, scope); // 对象属性赋值
      }
    },
 
    [astTypes.CallExpression](node, scope) { // 调用表达式
-     const func = traverse(node.callee, scope);
+     const func = traverse(node.callee, scope); // 获取函数值
      const args = node.arguments.map(arg => traverse(arg, scope));
 
      // 对象调用（成员表达式）
      if (node.callee.type === astTypes.MemberExpression) {
        const object = traverse(node.callee.object, scope);
-       return func.apply(object, args)
+       return func.apply(object, args); // 绑定函数内部this作用域
      } else {
        // 变量调用
        return func.apply(null, args);
@@ -108,7 +108,7 @@ function traverse(ast, scope) {
     return exec(ast, scope); // 递归调用
   }
 
-  throw new Error(`未找到对应的执行函数: ${ast.type}`);
+  throw new Error(`未找到对应的执行函数: ${JSON.stringify(ast)}`);
 }
 
 const globalApi = {
