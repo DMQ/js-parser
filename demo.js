@@ -14,7 +14,6 @@ const code = `
   console.log(a, b);
 `;
 
-
 const inputStream = new InputStream(code);
 const tokenStream = new TokenStream(inputStream);
 

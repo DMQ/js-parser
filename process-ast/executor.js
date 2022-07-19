@@ -29,11 +29,9 @@ const Scope = require('./scope');
    [astTypes.VariableDeclaration](node, scope) { // 变量声明，当前作用域声明变量，设置初始值
      const { kind, declarations } = node;
 
-     const initValue = declarations[declarations.length - 1].init; // 如果有多个声明器，初始值是放在最后一个（生成ast的时候的规则）
-
      for (const declarator of declarations) {
        const { name } = declarator.id;
-       scope.declare(name, initValue ? traverse(initValue, scope) : undefined);
+       scope.declare(name, declarator.init ? traverse(declarator.init, scope) : undefined);
      }
    },
 

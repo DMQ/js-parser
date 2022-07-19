@@ -6,6 +6,7 @@ class InputStream {
     this.col = 1;
   }
 
+  // 读取下一个字符
   next() {
     const ch = this.input.charAt(this.pos);
     if (ch === '\n') {
@@ -20,14 +21,17 @@ class InputStream {
     return ch;
   }
 
+  // 窥探下一个字符
   peek() {
     return this.input.charAt(this.pos);
   }
 
+  // 是否读取结束
   eof() {
     return this.peek() === '';
   }
 
+  // 抛错
   error(msg) {
     throw new Error(`${msg} (${this.line}:${this.col})`);
   }

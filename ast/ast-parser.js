@@ -249,6 +249,7 @@ class Parser {
       }
     }
 
+    // 字面量
     if (parserTools.isString(token) || parserTools.isNumber(token)) {
       // 字符串、数字字面量（可能存在二元运算）
       left = this.parseLiteral();
